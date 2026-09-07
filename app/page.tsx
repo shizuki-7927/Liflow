@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Expense = {
   id: number;
@@ -63,7 +63,24 @@ const formatYen = (amount: number) => {
 };
 
 export default function Home() {
-  const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
+  const [expenses, setExpenses] = useState<Expense[]>(() => {
+
+    if (typeof window === "undefined") {
+      return initialExpenses;
+    }
+
+    const savedExpenses = localStorage.getItem("liflow-expenses");
+
+      if (savedExpenses) {
+        return JSON.parse(savedExpenses);
+    }
+
+    return initialExpenses;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("liflow-expenses", JSON.stringify(expenses));
+  }, [expenses]);
 
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
 
