@@ -29,10 +29,31 @@ const initialExpenses: Expense[] = [
   { id: 4, category: "その他", amount: 8600 },
 ];
 
-const utilities: Utility[] = [
-  { name: "電気", amount: 4820, change: 12, icon: "⚡" },
-  { name: "ガス", amount: 3210, change: -8, icon: "🔥" },
-  { name: "水道", amount: 4270, change: 4, icon: "💧" },
+const initialBills = [
+  {
+    id: 1,
+    name: "電気",
+    amount: 4820,
+    dueDate: "2026年9月20日",
+    icon: "⚡",
+    paid: false,
+  },
+  {
+    id: 2,
+    name: "ガス",
+    amount: 3210,
+    dueDate: "2026年9月25日",
+    icon: "🔥",
+    paid: false,
+  },
+  {
+    id: 3,
+    name: "水道",
+    amount: 4270,
+    dueDate: "2026年9月30日",
+    icon: "💧",
+    paid: true,
+  },
 ];
 
 const initialTasks: Task[] = [
@@ -118,6 +139,31 @@ export default function Home() {
     setExpenseAmount("");
     setIsExpenseModalOpen(false);
   };
+
+  const [bills, setBills] = useState(initialBills);
+
+useEffect(() => {
+  const savedBills = localStorage.getItem("liflow-bills");
+
+  if (savedBills) {
+    setBills(JSON.parse(savedBills));
+  }
+}, []);
+
+const utilities = bills.map((bill) => {
+  const changes: Record<string, number> = {
+    電気: 12,
+    ガス: -8,
+    水道: 4,
+  };
+
+  return {
+    name: bill.name,
+    amount: bill.amount,
+    change: changes[bill.name] ?? 0,
+    icon: bill.icon,
+  };
+});
 
   return (
     <main className="min-h-screen bg-[#f7f8fa] pb-24 text-[#20242a]">
