@@ -18,8 +18,9 @@ type Utility = {
 type Task = {
   id: number;
   title: string;
-  date: string;
-  icon: string;
+  dueDate: string;
+  category: string;
+  completed: boolean;
 };
 
 const initialExpenses: Expense[] = [
@@ -56,24 +57,27 @@ const initialBills = [
   },
 ];
 
-const initialTasks: Task[] = [
+const visibleTasks: Task[] = [
   {
     id: 1,
     title: "燃えるゴミ",
-    date: "今日 8:00まで",
-    icon: "🗑️",
+  dueDate: "今日 8:00まで",
+    category: "ゴミ出し",
+    completed: false,
   },
   {
     id: 2,
-    title: "クレジットカード支払い",
-    date: "明日",
-    icon: "💳",
+    title: "クレジットカード支払いを確認",
+    dueDate: "明日",
+    category: "支払い",
+    completed: false,
   },
   {
     id: 3,
-    title: "部屋の掃除",
-    date: "土曜日",
-    icon: "🧹",
+    title: "部屋を掃除する",
+    dueDate: "土曜日",
+    category: "掃除",
+    completed: false,
   },
 ];
 
@@ -147,6 +151,20 @@ useEffect(() => {
 
   if (savedBills) {
     setBills(JSON.parse(savedBills));
+  }
+}, []);
+
+ const [tasks, setTasks] = useState<Task[]>(visibleTasks);
+
+ useEffect(() => {
+  const savedTasks = localStorage.getItem("liflow-tasks");
+
+  if (savedTasks) {
+    try {
+      setTasks(JSON.parse(savedTasks));
+    } catch {
+      setTasks(visibleTasks);
+    }
   }
 }, []);
 
@@ -254,9 +272,12 @@ const utilities = bills.map((bill) => {
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-[18px] font-bold">光熱費</h2>
 
-            <button className="text-[15px] font-medium text-[#5b63d3]">
-              すべて見る
-            </button>
+        <button
+          onClick={() => (window.location.href = "/tasks")}
+          className="text-[15px] font-medium text-[#5b63d3]"
+        >
+          すべて見る
+        </button>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
@@ -303,34 +324,45 @@ const utilities = bills.map((bill) => {
           </div>
 
           <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-            {initialTasks.map((task, index) => (
-              <div
-                key={task.id}
-                className={`flex items-center px-5 py-4 ${
-                  index !== initialTasks.length - 1
-                    ? "border-b border-[#eceef1]"
-                    : ""
-                }`}
-              >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#f3f4f8] text-lg">
-                  {task.icon}
-                </div>
+           {tasks
+  .filter((task) => !task.completed)
+  .slice(0, 3)
+  .map((task, index, visibleTasks) => (
+    <div
+      key={task.id}
+      className={`flex items-center px-5 py-4 ${
+        index !== visibleTasks.length - 1
+          ? "border-b border-[#eceef1]"
+          : ""
+      }`}
+    >
+      {/* タスクアイコン */}
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#f3f4f8] text-lg">
+        {task.category === "ゴミ出し"
+          ? "🗑️"
+          : task.category === "支払い"
+            ? "💳"
+            : task.category === "掃除"
+              ? "🧹"
+              : "✓"}
+      </div>
 
-                <div className="ml-4">
-                  <p className="text-[15px] font-semibold">
-                    {task.title}
-                  </p>
+      {/* タスク内容 */}
+      <div className="ml-4 min-w-0">
+        <p className="truncate text-[15px] font-semibold">
+          {task.title}
+        </p>
 
-                  <p className="mt-1 text-[13px] text-[#657080]">
-                    {task.date}
-                  </p>
-                </div>
+        <p className="mt-1 text-[13px] text-[#657080]">
+          {task.dueDate}
+        </p>
+      </div>
 
-                <div className="ml-auto text-xl text-[#c4c9d2]">
-                  ›
-                </div>
-              </div>
-            ))}
+      <div className="ml-auto shrink-0 text-xl text-[#c4c9d2]">
+        ›
+      </div>
+    </div>
+  ))}
           </div>
         </section>
 
